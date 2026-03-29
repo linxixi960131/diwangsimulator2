@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <title>帝王模拟器2</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/animations.css">
+    <link rel="stylesheet" href="styles/iphone17.css">
+</head>
+<body>
+    <!-- 启动画面 -->
+    <div id="splash-screen" class="screen active">
+        <div class="splash-content">
+            <h1 class="game-title">帝王模拟器<span class="version">2</span></h1>
+            <p class="subtitle">登基称帝，治理天下</p>
+            <div class="decoration">
+                <span class="dragon">🐲</span>
+            </div>
+            <button class="btn-start" onclick="game.startNewGame()">开始登基</button>
+            <button class="btn-load" onclick="game.showLoadScreen()">继续执政</button>
+        </div>
+    </div>
+
+    <!-- 角色创建界面 -->
+    <div id="character-creation" class="screen">
+        <div class="creation-container">
+            <h2>登基大典</h2>
+            <div class="form-section">
+                <div class="form-group">
+                    <label>朝代名称</label>
+                    <input type="text" id="dynasty-name" placeholder="如：大明、大唐" maxlength="6">
+                </div>
+                <div class="form-group">
+                    <label>皇帝年号</label>
+                    <input type="text" id="emperor-title" placeholder="如：永乐、贞观" maxlength="6">
+                </div>
+                <div class="form-group">
+                    <label>皇帝姓名</label>
+                    <input type="text" id="emperor-name" placeholder="请输入姓名" maxlength="6">
+                </div>
+                <div class="form-group">
+                    <label>初始年龄</label>
+                    <select id="start-age">
+                        <option value="16">16岁 - 少年天子</option>
+                        <option value="20" selected>20岁 - 正值壮年</option>
+                        <option value="30">30岁 - 成熟稳重</option>
+                        <option value="40">40岁 - 不惑之年</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="attributes-distribution">
+                <h3>初始属性分配 <span class="points-remaining">剩余点数: <span id="points-left">30</span></span></h3>
+                <div class="attribute-row">
+                    <label>文学</label>
+                    <div class="slider-container">
+                        <input type="range" id="attr-literature" min="0" max="100" value="20" class="attr-slider">
+                        <span class="value" id="val-literature">20</span>
+                    </div>
+                    <span class="attr-desc">影响招揽名臣</span>
+                </div>
+                <div class="attribute-row">
+                    <label>武术</label>
+                    <div class="slider-container">
+                        <input type="range" id="attr-martial" min="0" max="100" value="20" class="attr-slider">
+                        <span class="value" id="val-martial">20</span>
+                    </div>
+                    <span class="attr-desc">影响遇刺存活率</span>
+                </div>
+                <div class="attribute-row">
+                    <label>才艺</label>
+                    <div class="slider-container">
+                        <input type="range" id="attr-talent" min="0" max="100" value="20" class="attr-slider">
+                        <span class="value" id="val-talent">20</span>
+                    </div>
+                    <span class="attr-desc">影响邂逅名妃</span>
+                </div>
+                <div class="attribute-row">
+                    <label>体能</label>
+                    <div class="slider-container">
+                        <input type="range" id="attr-stamina" min="0" max="100" value="20" class="attr-slider">
+                        <span class="value" id="val-stamina">20</span>
+                    </div>
+                    <span class="attr-desc">影响每日处理政务量</span>
+                </div>
+            </div>
+            
+            <div class="creation-buttons">
+                <button class="btn-back" onclick="game.showScreen('splash-screen')">返回</button>
+                <button class="btn-confirm" onclick="game.confirmCreation()">登基称帝</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主游戏界面 -->
+    <div id="main-game" class="screen">
+        <!-- 顶部状态栏 -->
+        <div class="top-bar">
+            <div class="emperor-info">
+                <span class="dynasty" id="display-dynasty">大明</span>
+                <span class="emperor-name" id="display-emperor">永乐帝</span>
+            </div>
+            <div class="date-info">
+                <span id="game-date">永乐元年 正月</span>
+                <span class="age" id="emperor-age">年龄: 20岁</span>
+            </div>
+        </div>
+        
+        <!-- 资源面板 -->
+        <div class="resource-panel">
+            <div class="resource-item">
+                <span class="icon">💰</span>
+                <span class="name">国库</span>
+                <span class="value" id="res-money">500万两</span>
+            </div>
+            <div class="resource-item">
+                <span class="icon">🌾</span>
+                <span class="name">粮食</span>
+                <span class="value" id="res-food">1000万石</span>
+            </div>
+            <div class="resource-item">
+                <span class="icon">⚔️</span>
+                <span class="name">军队</span>
+                <span class="value" id="res-army">50万</span>
+            </div>
+            <div class="resource-item">
+                <span class="icon">❤️</span>
+                <span class="name">民心</span>
+                <span class="value" id="res-people">80</span>
+            </div>
+            <div class="resource-item">
+                <span class="icon">📜</span>
+                <span class="name">政令</span>
+                <span class="value" id="res-order">10/10</span>
+            </div>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 左侧功能区 -->
+            <div class="left-panel">
+                <div class="emperor-avatar">
+                    <div class="avatar-container">
+                        <span class="avatar-emoji">👑</span>
+                        <div class="status-bars">
+                            <div class="status-item">
+                                <span class="status-name">健康</span>
+                                <div class="progress-bar">
+                                    <div class="fill" id="health-bar" style="width: 90%"></div>
+                                </div>
+                                <span class="status-value" id="health-value">90</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-name">体力</span>
+                                <div class="progress-bar">
+                                    <div class="fill" id="stamina-bar" style="width: 80%"></div>
+                                </div>
+                                <span class="status-value" id="stamina-value">80</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="attribute-display">
+                    <h4>皇帝属性</h4>
+                    <div class="attr-grid">
+                        <div class="attr-box">
+                            <span class="attr-icon">📚</span>
+                            <span class="attr-name">文学</span>
+                            <span class="attr-value" id="attr-lit-display">20</span>
+                        </div>
+                        <div class="attr-box">
+                            <span class="attr-icon">⚔️</span>
+                            <span class="attr-name">武术</span>
+                            <span class="attr-value" id="attr-mar-display">20</span>
+                        </div>
+                        <div class="attr-box">
+                            <span class="attr-icon">🎨</span>
+                            <span class="attr-name">才艺</span>
+                            <span class="attr-value" id="attr-tal-display">20</span>
+                        </div>
+                        <div class="attr-box">
+                            <span class="attr-icon">👑</span>
+                            <span class="attr-name">道德</span>
+                            <span class="attr-value" id="attr-mor-display">50</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 中间主要内容 -->
+            <div class="center-panel">
+                <div class="scene-display" id="scene-display">
+                    <div class="scene-background" id="scene-bg">
+                        <div class="scene-characters" id="scene-chars"></div>
+                    </div>
+                    <div class="scene-text" id="scene-text">
+                        <p>欢迎来到帝王模拟器2！作为新登基的皇帝，你需要治理好这个庞大的帝国。</p>
+                    </div>
+                </div>
+                
+                <div class="action-buttons" id="action-buttons">
+                    <button class="action-btn" onclick="game.goToCourt()">
+                        <span class="icon">🏛️</span>
+                        <span class="text">上朝议政</span>
+                    </button>
+                    <button class="action-btn" onclick="game.visitHarem()">
+                        <span class="icon">🌸</span>
+                        <span class="text">后宫</span>
+                    </button>
+                    <button class="action-btn" onclick="game.manageMilitary()">
+                        <span class="icon">⚔️</span>
+                        <span class="text">军事</span>
+                    </button>
+                    <button class="action-btn" onclick="game.visitCity()">
+                        <span class="icon">🏙️</span>
+                        <span class="text">出巡</span>
+                    </button>
+                    <button class="action-btn" onclick="game.rest()">
+                        <span class="icon">😴</span>
+                        <span class="text">休息</span>
+                    </button>
+                    <button class="action-btn" onclick="game.nextTurn()">
+                        <span class="icon">📅</span>
+                        <span class="text">下月</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 右侧信息面板 -->
+            <div class="right-panel">
+                <div class="info-tabs">
+                    <button class="tab-btn active" data-tab="officials">官员</button>
+                    <button class="tab-btn" data-tab="events">事件</button>
+                    <button class="tab-btn" data-tab="quests">任务</button>
+                </div>
+                
+                <div class="tab-content" id="tab-officials">
+                    <div class="officials-list" id="officials-list">
+                        <!-- 官员列表动态生成 -->
+                    </div>
+                </div>
+                
+                <div class="tab-content hidden" id="tab-events">
+                    <div class="events-list" id="events-list">
+                        <!-- 事件列表动态生成 -->
+                    </div>
+                </div>
+                
+                <div class="tab-content hidden" id="tab-quests">
+                    <div class="quests-list" id="quests-list">
+                        <!-- 任务列表动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部菜单 -->
+        <div class="bottom-menu">
+            <button class="menu-btn" onclick="game.saveGame()">
+                <span class="icon">💾</span>
+                <span>保存</span>
+            </button>
+            <button class="menu-btn" onclick="game.showSettings()">
+                <span class="icon">⚙️</span>
+                <span>设置</span>
+            </button>
+            <button class="menu-btn" onclick="game.showHelp()">
+                <span class="icon">❓</span>
+                <span>帮助</span>
+            </button>
+            <button class="menu-btn" onclick="game.returnToMenu()">
+                <span class="icon">🏠</span>
+                <span>主菜单</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 模态框容器 -->
+    <div id="modal-container" class="modal-container hidden">
+        <!-- 动态生成模态框内容 -->
+    </div>
+
+    <!-- 通知容器 -->
+    <div id="notification-container" class="notification-container"></div>
+
+    <!-- 游戏脚本 - 按依赖顺序加载 -->
+    <!-- 1. 核心数据类（无依赖） -->
+    <script src="js/core/Player.js"></script>
+    <script src="js/core/Resources.js"></script>
+    
+    <!-- 2. 系统类 -->
+    <script src="js/systems/OfficialSystem.js"></script>
+    <script src="js/systems/HaremSystem.js"></script>
+    <script src="js/systems/MilitarySystem.js"></script>
+    <script src="js/systems/DiplomacySystem.js"></script>
+    
+    <!-- 3. 事件系统 -->
+    <script src="js/core/EventSystem.js"></script>
+    
+    <!-- 4. UI类 -->
+    <script src="js/ui/UIManager.js"></script>
+    <script src="js/ui/ModalManager.js"></script>
+    
+    <!-- 5. 游戏核心类（依赖以上所有类） -->
+    <script src="js/core/Game.js"></script>
+    
+    <!-- 6. 入口文件 -->
+    <script src="js/main.js"></script>
+</body>
+</html>

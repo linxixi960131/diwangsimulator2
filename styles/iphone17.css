@@ -1,0 +1,353 @@
+/**
+ * 帝王模拟器2 - iPhone 17 系列专用样式
+ * 针对 iPhone 17 Pro / Pro Max 的屏幕尺寸优化
+ */
+
+/* ==================== iPhone 17 基础适配 ==================== */
+
+/* iPhone 17 Pro Max - 6.9英寸屏幕 */
+@media only screen 
+    and (device-width: 430px) 
+    and (device-height: 932px) 
+    and (-webkit-device-pixel-ratio: 3) {
+    
+    /* 根字体大小调整 */
+    :root {
+        --font-size-base: 16px;
+        --spacing-unit: 8px;
+    }
+    
+    /* 游戏标题 */
+    .game-title {
+        font-size: 2.4rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .game-title .version {
+        font-size: 1.6rem;
+    }
+    
+    /* 启动页按钮 */
+    .btn-start, .btn-load {
+        width: 220px;
+        padding: 0.875rem 1.5rem;
+        font-size: 1.1rem;
+    }
+    
+    /* 角色创建页 */
+    .creation-container {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .creation-container h2 {
+        font-size: 1.75rem;
+    }
+    
+    /* 表单布局调整 */
+    .form-section {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    /* 属性滑块 */
+    .attribute-row {
+        grid-template-columns: 60px 1fr;
+        gap: 0.5rem;
+    }
+    
+    .attr-desc {
+        display: none;
+    }
+    
+    /* 主游戏界面 - 顶部栏 */
+    .top-bar {
+        padding: 0.5rem 1rem;
+        padding-top: calc(0.5rem + env(safe-area-inset-top));
+    }
+    
+    .dynasty {
+        font-size: 1.1rem;
+    }
+    
+    .emperor-name {
+        font-size: 0.9rem;
+    }
+    
+    #game-date {
+        font-size: 1rem;
+    }
+    
+    /* 资源面板 */
+    .resource-panel {
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .resource-item {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .resource-item .name {
+        display: none;
+    }
+    
+    .resource-item .icon {
+        font-size: 1rem;
+    }
+    
+    /* 主内容区布局调整 */
+    .main-content {
+        flex-direction: column;
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    /* 左侧面板 - 改为横向滚动 */
+    .left-panel {
+        width: 100%;
+        flex-direction: row;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+    
+    .emperor-avatar {
+        min-width: 120px;
+        padding: 0.75rem;
+    }
+    
+    .avatar-emoji {
+        font-size: 3rem;
+    }
+    
+    .attribute-display {
+        min-width: 200px;
+        flex: 1;
+    }
+    
+    .attr-grid {
+        gap: 0.5rem;
+    }
+    
+    .attr-box {
+        padding: 0.5rem;
+    }
+    
+    .attr-icon {
+        font-size: 1.2rem;
+    }
+    
+    .attr-value {
+        font-size: 1rem;
+    }
+    
+    /* 中间面板 */
+    .center-panel {
+        min-height: 0;
+    }
+    
+    .scene-display {
+        min-height: 150px;
+    }
+    
+    .scene-characters {
+        font-size: 4rem;
+    }
+    
+    .scene-text {
+        padding: 1rem;
+        max-height: 120px;
+    }
+    
+    .scene-text p {
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+    
+    /* 操作按钮区 */
+    .action-buttons {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+    
+    .action-btn {
+        padding: 0.5rem;
+        gap: 0.25rem;
+    }
+    
+    .action-btn .icon {
+        font-size: 1.2rem;
+    }
+    
+    .action-btn .text {
+        font-size: 0.75rem;
+    }
+    
+    /* 右侧面板 */
+    .right-panel {
+        width: 100%;
+        max-height: 200px;
+    }
+    
+    .info-tabs {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .tab-content {
+        max-height: 150px;
+    }
+    
+    /* 底部菜单 */
+    .bottom-menu {
+        gap: 0.5rem;
+        padding: 0.5rem;
+        padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+    }
+    
+    .menu-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    
+    .menu-btn .icon {
+        font-size: 0.9rem;
+    }
+}
+
+/* iPhone 17 Pro - 6.3英寸屏幕 */
+@media only screen 
+    and (device-width: 393px) 
+    and (device-height: 852px) 
+    and (-webkit-device-pixel-ratio: 3) {
+    
+    :root {
+        --font-size-base: 15px;
+    }
+    
+    .game-title {
+        font-size: 2.2rem;
+    }
+    
+    /* 布局与 Pro Max 相同，但字体稍小 */
+    .action-buttons {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ==================== iOS 通用优化 ==================== */
+
+/* iOS 触摸优化 */
+@supports (-webkit-touch-callout: none) {
+    /* 所有可点击元素 */
+    button, .action-btn, .menu-btn, .tab-btn, .btn-start, .btn-load,
+    .btn-confirm, .btn-back, .official-card, .event-card, .concubine-card {
+        cursor: pointer;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+    }
+    
+    /* 防止文本被选中 */
+    body {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+    
+    /* 允许输入框选中 */
+    input, textarea {
+        -webkit-user-select: auto;
+        user-select: auto;
+    }
+}
+
+/* iOS 滚动优化 */
+@supports (-webkit-overflow-scrolling: touch) {
+    .tab-content, .scene-text, .events-list, .officials-list {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* iOS 安全区域适配 */
+@supports (padding-top: env(safe-area-inset-top)) {
+    .ios-device .top-bar {
+        padding-top: max(0.75rem, env(safe-area-inset-top));
+    }
+    
+    .ios-device .bottom-menu {
+        padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
+    
+    .ios-device .screen {
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+}
+
+/* ==================== iOS 特定修复 ==================== */
+
+/* 修复 iOS 按钮点击无响应 */
+@media (hover: none) and (pointer: coarse) {
+    .action-btn, .menu-btn, .tab-btn {
+        transform: translateZ(0);
+        will-change: transform;
+    }
+    
+    .action-btn:active, .menu-btn:active, .tab-btn:active {
+        transform: scale(0.95);
+    }
+}
+
+/* 修复 iOS 模态框滚动问题 */
+.modal-container {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 修复 iOS 100vh 问题 */
+@supports (-webkit-touch-callout: none) {
+    .screen, #main-game, #splash-screen, #character-creation {
+        height: -webkit-fill-available;
+        min-height: -webkit-fill-available;
+    }
+}
+
+/* ==================== iPhone 17 Pro 灵动岛适配 ==================== */
+
+@supports (top: env(safe-area-inset-top)) {
+    @media (device-height: 932px), (device-height: 852px) {
+        /* iPhone 17 Pro Max / Pro 灵动岛区域 */
+        .ios-device .top-bar::before {
+            content: '';
+            display: block;
+            height: max(12px, calc(env(safe-area-inset-top) - 20px));
+        }
+    }
+}
+
+/* ==================== iOS 性能优化 ==================== */
+
+/* 启用 GPU 加速 */
+.screen, .modal-content, .scene-display, .action-buttons {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* 减少重绘 */
+.resource-panel, .top-bar, .bottom-menu {
+    contain: layout style;
+}
+
+/* iOS 省电模式适配 */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
