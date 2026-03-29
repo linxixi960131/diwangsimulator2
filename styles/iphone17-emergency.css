@@ -1,0 +1,214 @@
+/*!
+ * 帝王模拟器2 - iPhone 17 紧急修复 v2
+ * 最高优先级样式，解决显示不全问题
+ */
+
+/* ===== 通用 iOS 设备检测 - 覆盖所有 iPhone 17 型号 ===== */
+@media screen and (max-width: 440px) and (-webkit-device-pixel-ratio: 3) {
+    
+    /* ===== 强制主游戏区域可滚动 ===== */
+    #main-game {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        padding-bottom: 100px !important; /* 增加底部padding确保底部内容可见 */
+    }
+    
+    /* ===== 主内容区强制可滚动 ===== */
+    .main-content {
+        flex: none !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        max-height: calc(100vh - 200px) !important;
+        max-height: calc(100dvh - 200px) !important;
+    }
+    
+    /* ===== 右侧面板可滚动 ===== */
+    .right-panel {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        max-height: 150px !important;
+    }
+    
+    /* ===== 操作按钮区域始终可见 ===== */
+    .action-buttons {
+        position: sticky !important;
+        bottom: 0 !important;
+        z-index: 100 !important;
+        background: rgba(26, 26, 46, 0.98) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+    }
+    
+    /* ===== 底部菜单始终可见 ===== */
+    .bottom-menu {
+        position: sticky !important;
+        bottom: 0 !important;
+        z-index: 101 !important;
+        background: rgba(0, 0, 0, 0.9) !important;
+    }
+    
+    /* ===== 压缩顶部栏 ===== */
+    .top-bar {
+        padding: 4px 8px !important;
+        padding-top: max(4px, env(safe-area-inset-top)) !important;
+    }
+    
+    .dynasty {
+        font-size: 14px !important;
+    }
+    
+    .emperor-name {
+        font-size: 11px !important;
+    }
+    
+    /* ===== 压缩资源面板 ===== */
+    .resource-panel {
+        padding: 4px 6px !important;
+        gap: 4px !important;
+    }
+    
+    .resource-item {
+        padding: 3px 6px !important;
+        font-size: 11px !important;
+    }
+    
+    .resource-item .name {
+        display: none !important;
+    }
+    
+    /* ===== 压缩属性显示 ===== */
+    .attribute-display h4 {
+        font-size: 12px !important;
+    }
+    
+    .attr-box {
+        padding: 4px !important;
+    }
+    
+    .attr-icon {
+        font-size: 16px !important;
+    }
+    
+    .attr-name {
+        font-size: 9px !important;
+    }
+    
+    .attr-value {
+        font-size: 13px !important;
+    }
+    
+    /* ===== 压缩操作按钮 ===== */
+    .action-btn {
+        padding: 6px 2px !important;
+        min-height: 48px !important;
+    }
+    
+    .action-btn .icon {
+        font-size: 18px !important;
+    }
+    
+    .action-btn .text {
+        font-size: 9px !important;
+    }
+    
+    /* ===== 压缩底部菜单 ===== */
+    .menu-btn {
+        padding: 4px 8px !important;
+        font-size: 10px !important;
+    }
+    
+    .menu-btn .icon {
+        font-size: 12px !important;
+    }
+}
+
+/* ===== iPhone 17 Pro Max 特定修复 ===== */
+@media screen 
+    and (device-width: 430px) 
+    and (device-height: 932px) {
+    
+    #main-game {
+        padding-bottom: 120px !important;
+    }
+    
+    .main-content {
+        max-height: calc(100dvh - 180px) !important;
+    }
+}
+
+/* ===== iPhone 17 Pro 特定修复 ===== */
+@media screen 
+    and (device-width: 393px) 
+    and (device-height: 852px) {
+    
+    #main-game {
+        padding-bottom: 110px !important;
+    }
+    
+    .main-content {
+        max-height: calc(100dvh - 170px) !important;
+    }
+}
+
+/* ===== iOS 横屏模式修复 ===== */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    #main-game {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        overflow-y: auto !important;
+    }
+    
+    .top-bar {
+        width: 100% !important;
+        order: 1 !important;
+    }
+    
+    .resource-panel {
+        width: 100% !important;
+        order: 2 !important;
+    }
+    
+    .main-content {
+        width: 100% !important;
+        order: 3 !important;
+        flex-direction: row !important;
+        max-height: none !important;
+    }
+    
+    .left-panel {
+        width: 30% !important;
+        flex-direction: column !important;
+    }
+    
+    .center-panel {
+        width: 40% !important;
+    }
+    
+    .right-panel {
+        width: 30% !important;
+    }
+    
+    .bottom-menu {
+        width: 100% !important;
+        order: 4 !important;
+    }
+}
+
+/* ===== iOS 触摸优化 ===== */
+@supports (-webkit-touch-callout: none) {
+    .action-btn, .menu-btn, .tab-btn {
+        cursor: pointer !important;
+        -webkit-touch-callout: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+    }
+    
+    /* 强制启用滚动 */
+    #main-game, .main-content, .right-panel {
+        -webkit-overflow-scrolling: touch !important;
+    }
+}
