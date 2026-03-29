@@ -1,0 +1,351 @@
+/**
+ * 帝王模拟器2 - iPhone 17 紧急修复
+ * 解决主界面显示不全、按钮无法点击的问题
+ */
+
+/* ==================== iPhone 17 系列紧急修复 ==================== */
+
+/* iPhone 17 Pro Max - 6.9英寸 - 主界面修复 */
+@media only screen 
+    and (device-width: 430px) 
+    and (device-height: 932px) 
+    and (-webkit-device-pixel-ratio: 3) {
+    
+    /* ========== 全局布局调整 ========== */
+    
+    #main-game {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+    }
+    
+    /* ========== 顶部栏压缩 ========== */
+    .top-bar {
+        flex-shrink: 0;
+        padding: 4px 12px;
+        padding-top: max(4px, env(safe-area-inset-top));
+        min-height: 44px;
+    }
+    
+    .dynasty {
+        font-size: 15px;
+    }
+    
+    .emperor-name {
+        font-size: 12px;
+    }
+    
+    #game-date {
+        font-size: 13px;
+    }
+    
+    #emperor-age {
+        font-size: 11px;
+    }
+    
+    /* ========== 资源面板横向滚动 ========== */
+    .resource-panel {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 6px;
+        padding: 6px 12px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .resource-panel::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .resource-item {
+        flex-shrink: 0;
+        padding: 4px 10px;
+        font-size: 12px;
+        gap: 4px;
+    }
+    
+    .resource-item .icon {
+        font-size: 14px;
+    }
+    
+    .resource-item .name {
+        display: none;
+    }
+    
+    /* ========== 主内容区关键修复 ========== */
+    .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: 6px;
+        gap: 6px;
+        overflow: hidden;
+    }
+    
+    /* 左侧面板 - 横向滚动 */
+    .left-panel {
+        flex-shrink: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+    
+    .emperor-avatar {
+        flex-shrink: 0;
+        width: 110px;
+        padding: 8px;
+    }
+    
+    .avatar-emoji {
+        font-size: 36px;
+    }
+    
+    .status-bars {
+        margin-top: 4px;
+    }
+    
+    .status-item {
+        margin-bottom: 2px;
+    }
+    
+    .progress-bar {
+        height: 6px;
+    }
+    
+    .attribute-display {
+        flex: 1;
+        min-width: 200px;
+        padding: 8px;
+    }
+    
+    .attribute-display h4 {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+    
+    .attr-grid {
+        gap: 4px;
+    }
+    
+    .attr-box {
+        padding: 6px 4px;
+    }
+    
+    .attr-icon {
+        font-size: 16px;
+    }
+    
+    .attr-name {
+        font-size: 10px;
+    }
+    
+    .attr-value {
+        font-size: 14px;
+    }
+    
+    /* 中间面板 - 场景和按钮 */
+    .center-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        gap: 6px;
+    }
+    
+    .scene-display {
+        flex: 1;
+        min-height: 80px;
+        max-height: 120px;
+    }
+    
+    .scene-background {
+        min-height: 60px;
+    }
+    
+    .scene-characters {
+        font-size: 48px;
+    }
+    
+    .scene-text {
+        padding: 8px 10px;
+        max-height: 60px;
+    }
+    
+    .scene-text p {
+        font-size: 12px;
+        line-height: 1.4;
+    }
+    
+    /* ========== 操作按钮区域 - 关键修复 ========== */
+    .action-buttons {
+        flex-shrink: 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        padding: 6px;
+        background: rgba(26, 26, 46, 0.95);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 10px;
+        max-height: 140px;
+        overflow-y: auto;
+    }
+    
+    .action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 8px 4px;
+        background: linear-gradient(145deg, rgba(139, 0, 0, 0.5) 0%, rgba(100, 0, 0, 0.3) 100%);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 8px;
+        color: #f5f5f5;
+        font-size: 11px;
+        min-height: 56px;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+    
+    .action-btn .icon {
+        font-size: 20px;
+        margin-bottom: 2px;
+    }
+    
+    .action-btn .text {
+        font-size: 10px;
+        line-height: 1.2;
+    }
+    
+    .action-btn:active {
+        transform: scale(0.95);
+        background: linear-gradient(145deg, rgba(139, 0, 0, 0.7) 0%, rgba(100, 0, 0, 0.5) 100%);
+    }
+    
+    /* 右侧面板 - 简化为横向滚动 */
+    .right-panel {
+        flex-shrink: 0;
+        width: 100%;
+        max-height: 100px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .info-tabs {
+        display: flex;
+        flex-direction: row;
+        gap: 2px;
+        padding: 4px;
+        background: rgba(139, 0, 0, 0.5);
+    }
+    
+    .tab-btn {
+        flex: 1;
+        padding: 6px 4px;
+        font-size: 11px;
+    }
+    
+    .tab-content {
+        flex: 1;
+        max-height: 60px;
+        padding: 6px;
+    }
+    
+    /* 底部菜单 */
+    .bottom-menu {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 8px;
+        padding: 6px;
+        padding-bottom: max(6px, env(safe-area-inset-bottom));
+        background: rgba(0, 0, 0, 0.5);
+        border-top: 1px solid rgba(212, 175, 55, 0.3);
+    }
+    
+    .menu-btn {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 12px;
+        background: rgba(139, 0, 0, 0.5);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 15px;
+        color: #f5f5f5;
+        font-size: 12px;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+    
+    .menu-btn .icon {
+        font-size: 14px;
+    }
+    
+    .menu-btn:active {
+        transform: scale(0.95);
+    }
+}
+
+/* iPhone 17 Pro - 6.3英寸 - 相同的修复 */
+@media only screen 
+    and (device-width: 393px) 
+    and (device-height: 852px) 
+    and (-webkit-device-pixel-ratio: 3) {
+    
+    /* 复用上面的所有样式 */
+    #main-game {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+    }
+    
+    /* 其他样式与 Pro Max 相同，只需调整一些尺寸 */
+    .action-buttons {
+        max-height: 130px;
+    }
+    
+    .action-btn {
+        min-height: 52px;
+        padding: 6px 4px;
+    }
+}
+
+/* ==================== 横屏模式优化 ==================== */
+
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    /* 横屏时改为左右布局 */
+    #main-game {
+        flex-direction: row;
+    }
+    
+    .main-content {
+        flex-direction: row;
+    }
+    
+    .left-panel {
+        width: 150px;
+        flex-direction: column;
+    }
+    
+    .center-panel {
+        flex: 1;
+    }
+    
+    .right-panel {
+        width: 180px;
+    }
+}
+</content>
