@@ -75,10 +75,13 @@ class Game {
         
         // 设置属性滑块监听
         this.setupAttributeSliders();
-        
+
         // 设置标签页切换
         this.setupTabs();
-        
+
+        // 渲染头像选择网格
+        this.renderAvatarGrid();
+
         console.log('帝王模拟器2 - 初始化完成！');
     }
     
@@ -141,6 +144,32 @@ class Game {
         });
     }
     
+    /**
+     * 渲染头像选择网格
+     */
+    renderAvatarGrid() {
+        this.selectedAvatar = 0;
+        const grid = document.getElementById('avatar-grid');
+        if (!grid) return;
+
+        grid.innerHTML = '';
+        EMPEROR_AVATARS.forEach((avatar, index) => {
+            const option = document.createElement('div');
+            option.className = 'avatar-option' + (index === 0 ? ' selected' : '');
+            option.dataset.index = index;
+            option.innerHTML = `
+                <div class="avatar-svg">${avatar.svg}</div>
+                <span class="avatar-name">${avatar.name}</span>
+            `;
+            option.addEventListener('click', () => {
+                grid.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+                option.classList.add('selected');
+                this.selectedAvatar = index;
+            });
+            grid.appendChild(option);
+        });
+    }
+
     /**
      * 切换标签页
      */
@@ -223,6 +252,7 @@ class Game {
             dynastyName,
             emperorTitle,
             emperorName,
+            avatar: this.selectedAvatar || 0,
             age: startAge,
             attributes: {
                 literature,

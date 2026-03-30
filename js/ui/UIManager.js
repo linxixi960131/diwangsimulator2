@@ -45,6 +45,9 @@ class UIManager {
         
         // 场景显示
         this.elements.sceneText = document.getElementById('scene-text');
+
+        // 头像显示
+        this.elements.gameAvatar = document.getElementById('game-avatar');
     }
     
     /**
@@ -56,6 +59,7 @@ class UIManager {
         this.updateEmperorStatus();
         this.updateAttributes();
         this.updateDate();
+        this.updateAvatar();
     }
     
     /**
@@ -157,6 +161,17 @@ class UIManager {
         }
     }
     
+    /**
+     * 更新头像显示
+     */
+    updateAvatar() {
+        if (!this.elements.gameAvatar || !this.game.player) return;
+        const avatarIndex = this.game.player.avatar || 0;
+        if (typeof EMPEROR_AVATARS !== 'undefined' && EMPEROR_AVATARS[avatarIndex]) {
+            this.elements.gameAvatar.innerHTML = EMPEROR_AVATARS[avatarIndex].svg;
+        }
+    }
+
     /**
      * 设置场景文本
      */

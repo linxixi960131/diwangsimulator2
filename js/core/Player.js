@@ -9,6 +9,7 @@ class Player {
         this.dynastyName = '';
         this.emperorTitle = '';
         this.emperorName = '';
+        this.avatar = 0; // 头像索引
         this.age = 20;
         this.maxAge = 62; // 默认寿命
         
@@ -52,6 +53,7 @@ class Player {
         this.dynastyName = data.dynastyName || '大明';
         this.emperorTitle = data.emperorTitle || '永乐';
         this.emperorName = data.emperorName || '朱棣';
+        this.avatar = data.avatar || 0;
         this.age = data.age || 20;
         
         if (data.attributes) {
@@ -82,6 +84,7 @@ class Player {
             dynastyName: this.dynastyName,
             emperorTitle: this.emperorTitle,
             emperorName: this.emperorName,
+            avatar: this.avatar,
             age: this.age,
             maxAge: this.maxAge,
             attributes: { ...this.attributes },
@@ -106,6 +109,7 @@ class Player {
         this.dynastyName = data.dynastyName || '大明';
         this.emperorTitle = data.emperorTitle || '永乐';
         this.emperorName = data.emperorName || '朱棣';
+        this.avatar = data.avatar || 0;
         this.age = data.age || 20;
         this.maxAge = data.maxAge || 62;
         

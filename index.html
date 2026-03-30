@@ -60,7 +60,14 @@
                     </select>
                 </div>
             </div>
-            
+
+            <div class="avatar-selection">
+                <h3>选择头像</h3>
+                <div class="avatar-grid" id="avatar-grid">
+                    <!-- JS 动态生成头像选项 -->
+                </div>
+            </div>
+
             <div class="attributes-distribution">
                 <h3>初始属性分配 <span class="points-remaining">剩余点数: <span id="points-left">30</span></span></h3>
                 <div class="attribute-row">
@@ -153,7 +160,7 @@
             <div class="left-panel">
                 <div class="emperor-avatar">
                     <div class="avatar-container">
-                        <span class="avatar-emoji">👑</span>
+                        <div class="avatar-display" id="game-avatar"></div>
                         <div class="status-bars">
                             <div class="status-item">
                                 <span class="status-name">健康</span>
@@ -297,6 +304,8 @@
     <div id="notification-container" class="notification-container"></div>
 
     <!-- 游戏脚本 - 按依赖顺序加载 -->
+    <!-- 0. 头像数据（无依赖） -->
+    <script src="assets/avatars.js"></script>
     <!-- 1. 核心数据类（无依赖） -->
     <script src="js/core/Player.js"></script>
     <script src="js/core/Resources.js"></script>
