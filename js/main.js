@@ -3,6 +3,108 @@
  * 游戏启动和初始化
  */
 
+// ============ 移动端调试面板 ============
+(function() {
+    var debugLogs = [];
+    var debugPanel = null;
+    var debugBtn = null;
+    var isVisible = false;
+
+    function createDebugUI() {
+        // 浮动按钮
+        debugBtn = document.createElement('div');
+        debugBtn.id = 'debug-btn';
+        debugBtn.textContent = '0';
+        debugBtn.style.cssText = 'position:fixed;bottom:80px;right:10px;z-index:99999;width:36px;height:36px;border-radius:50%;background:#e74c3c;color:#fff;font-size:14px;font-weight:bold;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.5);cursor:pointer;-webkit-tap-highlight-color:transparent;opacity:0.85;';
+        debugBtn.addEventListener('click', function() {
+            isVisible = !isVisible;
+            debugPanel.style.display = isVisible ? 'block' : 'none';
+        });
+        document.body.appendChild(debugBtn);
+
+        // 日志面板
+        debugPanel = document.createElement('div');
+        debugPanel.id = 'debug-panel';
+        debugPanel.style.cssText = 'display:none;position:fixed;bottom:120px;right:10px;left:10px;z-index:99998;max-height:50vh;background:rgba(0,0,0,0.92);color:#0f0;font-family:monospace;font-size:12px;border-radius:8px;border:1px solid #444;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px;word-break:break-all;';
+        // 关闭和清除按钮
+        var toolbar = document.createElement('div');
+        toolbar.style.cssText = 'display:flex;justify-content:space-between;margin-bottom:6px;';
+        toolbar.innerHTML = '<span style="color:#FFD700;font-weight:bold;">Debug Console</span><span id="debug-clear" style="color:#f44;cursor:pointer;">清除</span>';
+        debugPanel.appendChild(toolbar);
+        document.body.appendChild(debugPanel);
+
+        document.getElementById('debug-clear').addEventListener('click', function() {
+            debugLogs = [];
+            updatePanel();
+        });
+    }
+
+    function updatePanel() {
+        if (!debugPanel) return;
+        // 保留 toolbar，清除后面的内容
+        while (debugPanel.childNodes.length > 1) {
+            debugPanel.removeChild(debugPanel.lastChild);
+        }
+        debugLogs.forEach(function(log) {
+            var line = document.createElement('div');
+            line.style.cssText = 'border-bottom:1px solid #333;padding:4px 0;color:' + log.color + ';';
+            line.textContent = '[' + log.time + '] ' + log.type + ': ' + log.msg;
+            debugPanel.appendChild(line);
+        });
+        debugPanel.scrollTop = debugPanel.scrollHeight;
+        if (debugBtn) {
+            var errCount = debugLogs.filter(function(l){ return l.type === 'ERROR'; }).length;
+            debugBtn.textContent = errCount;
+            debugBtn.style.background = errCount > 0 ? '#e74c3c' : '#27ae60';
+        }
+    }
+
+    function addLog(type, msg, color) {
+        var now = new Date();
+        var time = ('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2)+':'+('0'+now.getSeconds()).slice(-2);
+        debugLogs.push({type: type, msg: String(msg).substring(0, 500), time: time, color: color});
+        if (debugLogs.length > 50) debugLogs.shift();
+        updatePanel();
+    }
+
+    // 捕获全局错误（脚本加载错误等）
+    window.addEventListener('error', function(e) {
+        var msg = e.message || '';
+        if (e.filename) msg += ' (' + e.filename.split('/').pop() + ':' + e.lineno + ':' + e.colno + ')';
+        addLog('ERROR', msg, '#f44');
+    });
+
+    // 捕获 Promise 错误
+    window.addEventListener('unhandledrejection', function(e) {
+        addLog('PROMISE', e.reason, '#f90');
+    });
+
+    // 劫持 console 方法
+    var origError = console.error;
+    var origWarn = console.warn;
+    var origLog = console.log;
+    console.error = function() {
+        addLog('ERROR', Array.prototype.slice.call(arguments).join(' '), '#f44');
+        origError.apply(console, arguments);
+    };
+    console.warn = function() {
+        addLog('WARN', Array.prototype.slice.call(arguments).join(' '), '#fa0');
+        origWarn.apply(console, arguments);
+    };
+    console.log = function() {
+        addLog('LOG', Array.prototype.slice.call(arguments).join(' '), '#0f0');
+        origLog.apply(console, arguments);
+    };
+
+    // DOM 就绪后创建 UI
+    if (document.body) {
+        createDebugUI();
+    } else {
+        document.addEventListener('DOMContentLoaded', createDebugUI);
+    }
+})();
+// ============ 调试面板结束 ============
+
 // 等待DOM加载完成
 document.addEventListener('DOMContentLoaded', () => {
     console.log('=================================');
@@ -237,25 +339,22 @@ function initGame() {
 }
 
 /**
- * 全局错误处理
+ * 全局错误处理（通过调试面板捕获）
  */
 window.onerror = function(message, source, lineno, colno, error) {
-    console.error('全局错误:', { message, source, lineno, colno, error });
-    
-    // 如果在游戏已经初始化的情况下出错，显示错误通知
+    // 调试面板已通过 addEventListener('error') 捕获
+    // 此处保留游戏内通知
     if (window.game && window.game.showNotification) {
         window.game.showNotification('发生错误: ' + message, 'error');
     }
-    
     return false;
 };
 
 /**
- * 未处理的Promise错误
+ * 未处理的Promise错误（通过调试面板捕获）
  */
 window.addEventListener('unhandledrejection', function(event) {
-    console.error('未处理的Promise错误:', event.reason);
-    
+    // 调试面板已通过 addEventListener('unhandledrejection') 捕获
     if (window.game && game.showNotification) {
         game.showNotification('异步操作错误', 'error');
     }
