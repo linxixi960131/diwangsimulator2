@@ -683,23 +683,68 @@ class Game {
      */
     appointOfficials() {
         const officials = this.officialSystem.getAllOfficials();
-        
-        let officialsHtml = '<div class="officials-list">';
+        const positions = this.officialSystem.positions;
+
+        let officialsHtml = '<div class="officials-manage-list">';
         officials.forEach(official => {
+            const posOptions = positions.map(p =>
+                `<option value="${p.id}">${p.name}</option>`
+            ).join('');
+
             officialsHtml += `
-                <div class="official-item">
-                    <span class="name">${official.name}</span>
-                    <span class="position">${official.position || '未任命'}</span>
-                    <span class="ability">能力: ${official.ability}</span>
-                    <span class="loyalty">忠诚: ${official.loyalty}</span>
+                <div class="official-manage-item" style="display:flex;justify-content:space-between;align-items:center;padding:8px;margin:4px 0;background:rgba(255,255,255,0.05);border-radius:8px;flex-wrap:wrap;gap:6px;">
+                    <div style="min-width:120px;">
+                        <div style="color:#FFD700;font-weight:bold;">${official.name}</div>
+                        <div style="font-size:0.8em;color:#aaa;">能力:${official.ability} 忠诚:${official.loyalty}</div>
+                    </div>
+                    <div style="color:${official.position ? '#90EE90' : '#888'};">
+                        ${official.position || '待命'}
+                    </div>
+                    <div style="display:flex;gap:4px;align-items:center;">
+                        ${!official.hired ? `
+                            <select id="pos-${official.id}" style="padding:4px;border-radius:4px;border:1px solid #555;background:#1a1a2e;color:#fff;font-size:0.8em;">
+                                ${posOptions}
+                            </select>
+                            <button onclick="game.doHireOfficial(${JSON.stringify(official.id).replace(/"/g, '&quot;')})" style="padding:4px 10px;border-radius:4px;border:1px solid #4CAF50;background:rgba(76,175,80,0.2);color:#4CAF50;cursor:pointer;font-size:0.8em;">任命</button>
+                        ` : `
+                            <button onclick="game.doFireOfficial(${JSON.stringify(official.id).replace(/"/g, '&quot;')})" style="padding:4px 10px;border-radius:4px;border:1px solid #f44336;background:rgba(244,67,54,0.2);color:#f44336;cursor:pointer;font-size:0.8em;">免职</button>
+                        `}
+                    </div>
                 </div>
             `;
         });
         officialsHtml += '</div>';
-        
+
         this.modalManager.open('任免官员', officialsHtml, [
             { text: '关闭', action: () => this.modalManager.close() }
         ]);
+    }
+
+    /**
+     * 执行任命官员
+     */
+    doHireOfficial(officialId) {
+        const selectEl = document.getElementById('pos-' + officialId);
+        if (!selectEl) return;
+        const positionId = selectEl.value;
+        const result = this.officialSystem.hireOfficial(officialId, positionId);
+        this.showNotification(result.message, result.success ? 'success' : 'warning');
+        if (result.success) {
+            this.uiManager.updateResources();
+            this.appointOfficials(); // 刷新列表
+        }
+    }
+
+    /**
+     * 执行免职官员
+     */
+    doFireOfficial(officialId) {
+        const result = this.officialSystem.fireOfficial(officialId);
+        this.showNotification(result.message, result.success ? 'success' : 'warning');
+        if (result.success) {
+            this.uiManager.updateResources();
+            this.appointOfficials(); // 刷新列表
+        }
     }
     
     /**
@@ -958,6 +1003,86 @@ class Game {
     }
     
     /**
+     * 训练军队
+     */
+    trainArmy() {
+        const result = this.militarySystem.trainArmy();
+        if (result.success) {
+            this.showNotification(result.message, 'success');
+        } else {
+            this.showNotification(result.message, 'warning');
+        }
+        this.uiManager.updateResources();
+        this.modalManager.close();
+    }
+
+    /**
+     * 发动战争
+     */
+    launchCampaign() {
+        const targets = [
+            { name: '北方匈奴', difficulty: '普通' },
+            { name: '西域小国', difficulty: '简单' },
+            { name: '南方蛮族', difficulty: '普通' },
+            { name: '东海倭寇', difficulty: '困难' }
+        ];
+        const maxArmy = Math.floor(this.resources.army / 10000);
+
+        if (maxArmy <= 0) {
+            this.showNotification('军队数量不足！', 'warning');
+            return;
+        }
+
+        let targetsHtml = targets.map(t =>
+            `<label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;">
+                <input type="radio" name="war-target" value="${t.name}" style="accent-color:#FFD700;">
+                <span>${t.name}</span><span style="color:#aaa;font-size:0.85em;">（${t.difficulty}）</span>
+            </label>`
+        ).join('');
+
+        this.modalManager.open('发动战争', `
+            <div class="war-dialog">
+                <div style="margin-bottom:12px;">
+                    <p style="color:#FFD700;margin-bottom:6px;">选择目标：</p>
+                    ${targetsHtml}
+                </div>
+                <div style="margin-bottom:8px;">
+                    <p>可用军队：${maxArmy}万</p>
+                    <label>出兵数量（万）：</label>
+                    <input type="number" id="war-army-size" min="1" max="${maxArmy}" value="${Math.min(10, maxArmy)}" style="width:80px;padding:4px;border-radius:4px;border:1px solid #555;background:#1a1a2e;color:#fff;">
+                </div>
+            </div>
+        `, [
+            { text: '取消', action: () => this.modalManager.close() },
+            { text: '出征！', action: () => {
+                const targetEl = document.querySelector('input[name="war-target"]:checked');
+                if (!targetEl) {
+                    this.showNotification('请选择目标！', 'warning');
+                    return;
+                }
+                const armySize = (parseInt(document.getElementById('war-army-size').value) || 0) * 10000;
+                if (armySize <= 0) {
+                    this.showNotification('请输入出兵数量！', 'warning');
+                    return;
+                }
+                const result = this.militarySystem.launchWar(targetEl.value, armySize);
+                const losses = Math.floor(armySize * (0.1 + Math.random() * 0.2));
+                this.modalManager.close();
+                this.modalManager.open(result.isWin ? '大捷！' : '战败', `
+                    <div style="text-align:center;">
+                        <p style="font-size:2rem;">${result.isWin ? '🎉' : '😞'}</p>
+                        <p style="margin:10px 0;">${result.message}</p>
+                        <p style="color:#aaa;">损失兵力：${this.formatNumber(losses)}</p>
+                    </div>
+                `, [
+                    { text: '知道了', action: () => this.modalManager.close() }
+                ]);
+                this.uiManager.updateResources();
+            }}
+        ]);
+    }
+
+    /**
      * 出巡
      */
     visitCity() {
@@ -1082,5 +1207,103 @@ class Game {
         if (score >= 90) return '守成之君';
         if (score >= 60) return '平庸之主';
         return '昏庸之君';
+    }
+
+    /**
+     * 作弊面板
+     */
+    showCheatPanel() {
+        const btnStyle = 'display:block;width:100%;padding:8px;margin:4px 0;border-radius:6px;border:1px solid #FFD700;background:rgba(255,215,0,0.1);color:#FFD700;cursor:pointer;font-size:0.9em;text-align:left;';
+        this.modalManager.open('秘籍面板', `
+            <div style="max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+                <p style="color:#aaa;font-size:0.8em;margin-bottom:8px;">点击按钮立即生效</p>
+                <div style="margin-bottom:10px;">
+                    <div style="color:#FFD700;font-weight:bold;margin-bottom:4px;">资源</div>
+                    <button style="${btnStyle}" onclick="game.cheat('money')">💰 国库 +500万两</button>
+                    <button style="${btnStyle}" onclick="game.cheat('food')">🌾 粮食 +500万石</button>
+                    <button style="${btnStyle}" onclick="game.cheat('army')">⚔️ 军队 +10万</button>
+                    <button style="${btnStyle}" onclick="game.cheat('people')">❤️ 民心 +20</button>
+                    <button style="${btnStyle}" onclick="game.cheat('order')">📜 政令恢复满</button>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <div style="color:#FFD700;font-weight:bold;margin-bottom:4px;">状态</div>
+                    <button style="${btnStyle}" onclick="game.cheat('health')">💊 健康恢复满</button>
+                    <button style="${btnStyle}" onclick="game.cheat('stamina')">⚡ 体力恢复满</button>
+                </div>
+                <div>
+                    <div style="color:#FFD700;font-weight:bold;margin-bottom:4px;">属性</div>
+                    <button style="${btnStyle}" onclick="game.cheat('literature')">📚 文学 +10</button>
+                    <button style="${btnStyle}" onclick="game.cheat('martial')">⚔️ 武术 +10</button>
+                    <button style="${btnStyle}" onclick="game.cheat('talent')">🎨 才艺 +10</button>
+                    <button style="${btnStyle}" onclick="game.cheat('morality')">👑 道德 +10</button>
+                    <button style="${btnStyle}" onclick="game.cheat('all')">🔥 全部属性 +10</button>
+                </div>
+            </div>
+        `, [
+            { text: '关闭', action: () => this.modalManager.close() }
+        ]);
+    }
+
+    /**
+     * 执行作弊
+     */
+    cheat(type) {
+        if (!this.isPlaying) {
+            this.showNotification('请先开始游戏！', 'warning');
+            return;
+        }
+        switch (type) {
+            case 'money':
+                this.resources.money += 5000000;
+                this.showNotification('国库 +500万两', 'success');
+                break;
+            case 'food':
+                this.resources.food += 5000000;
+                this.showNotification('粮食 +500万石', 'success');
+                break;
+            case 'army':
+                this.resources.army += 100000;
+                this.showNotification('军队 +10万', 'success');
+                break;
+            case 'people':
+                this.resources.people = Math.min(100, this.resources.people + 20);
+                this.showNotification('民心 +20', 'success');
+                break;
+            case 'order':
+                this.resources.order = this.resources.maxOrder;
+                this.showNotification('政令已恢复满', 'success');
+                break;
+            case 'health':
+                this.player.health = this.player.maxHealth;
+                this.showNotification('健康已恢复满', 'success');
+                break;
+            case 'stamina':
+                this.player.stamina = this.player.maxStamina;
+                this.showNotification('体力已恢复满', 'success');
+                break;
+            case 'literature':
+                this.player.attributes.literature = Math.min(100, this.player.attributes.literature + 10);
+                this.showNotification('文学 +10', 'success');
+                break;
+            case 'martial':
+                this.player.attributes.martial = Math.min(100, this.player.attributes.martial + 10);
+                this.showNotification('武术 +10', 'success');
+                break;
+            case 'talent':
+                this.player.attributes.talent = Math.min(100, this.player.attributes.talent + 10);
+                this.showNotification('才艺 +10', 'success');
+                break;
+            case 'morality':
+                this.player.attributes.morality = Math.min(100, this.player.attributes.morality + 10);
+                this.showNotification('道德 +10', 'success');
+                break;
+            case 'all':
+                ['literature', 'martial', 'talent', 'morality'].forEach(attr => {
+                    this.player.attributes[attr] = Math.min(100, this.player.attributes[attr] + 10);
+                });
+                this.showNotification('全部属性 +10', 'success');
+                break;
+        }
+        this.uiManager.updateAll();
     }
 }
