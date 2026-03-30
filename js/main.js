@@ -41,8 +41,8 @@ function checkBrowserCompatibility() {
         'Promise': typeof Promise !== 'undefined',
         'Fetch API': typeof fetch !== 'undefined',
         'localStorage': typeof Storage !== 'undefined',
-        'CSS Grid': CSS.supports('display', 'grid'),
-        'CSS Flexbox': CSS.supports('display', 'flex'),
+        'CSS Grid': typeof CSS !== 'undefined' && CSS.supports ? CSS.supports('display', 'grid') : true,
+        'CSS Flexbox': typeof CSS !== 'undefined' && CSS.supports ? CSS.supports('display', 'flex') : true,
         'ES6 Classes': (() => {
             try {
                 eval('class Test {}');

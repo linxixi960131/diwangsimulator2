@@ -1001,8 +1001,10 @@ class Game {
     applyEventEffects(effectString) {
         const effects = effectString.split(',');
         effects.forEach(effect => {
-            const [key, value] = effect.split(':');
-            const numValue = parseInt(value);
+            const match = effect.match(/^(\w+)([+-])(\d+)$/);
+            if (!match) return;
+            const key = match[1];
+            const numValue = match[2] === '+' ? parseInt(match[3]) : -parseInt(match[3]);
             
             switch (key) {
                 case 'people':
