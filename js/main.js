@@ -387,17 +387,13 @@ window.addEventListener('load', function() {
  * 页面卸载前的清理
  */
 window.addEventListener('beforeunload', function(event) {
-    // 如果游戏正在进行中，提示用户保存
+    // 如果游戏正在进行中，静默自动保存
     if (window.game && game.isPlaying) {
-        // 自动保存
         try {
-            game.saveGame();
+            game.autoSave();
             console.log('自动保存完成');
         } catch (e) {
             console.error('自动保存失败:', e);
         }
-        
-        // 返回提示信息（某些浏览器可能不支持）
-        // return '游戏进度已自动保存。确定要离开吗？';
     }
 });

@@ -218,13 +218,6 @@ class Game {
     }
     
     /**
-     * 显示加载界面
-     */
-    showLoadScreen() {
-        this.loadGame();
-    }
-    
-    /**
      * 确认创建角色
      */
     confirmCreation() {
@@ -287,6 +280,7 @@ class Game {
         // 进入主游戏界面
         this.showScreen('main-game');
         this.isPlaying = true;
+        this.state.isPlaying = true;
         
         // 更新UI
         this.uiManager.updateAll();
@@ -304,6 +298,11 @@ class Game {
      * 保存游戏
      */
     saveGame() {
+        if (!this.isPlaying) {
+            this.showNotification('请先开始游戏！', 'warning');
+            return;
+        }
+
         const saveData = {
             player: this.player.getData(),
             resources: this.resources.getData(),
@@ -315,26 +314,150 @@ class Game {
             events: this.eventSystem.getData(),
             timestamp: new Date().toISOString()
         };
-        
-        localStorage.setItem('diwangsimulator2_save', JSON.stringify(saveData));
-        this.showNotification('游戏已保存！', 'success');
-        console.log('游戏已保存');
-    }
-    
-    /**
-     * 加载游戏
-     */
-    loadGame() {
-        const saveData = localStorage.getItem('diwangsimulator2_save');
-        if (!saveData) {
-            this.showNotification('没有找到存档！', 'warning');
-            return false;
+
+        // 读取3个存档位的信息
+        const slotInfo = [];
+        for (let i = 1; i <= 3; i++) {
+            const raw = localStorage.getItem('diwangsimulator2_slot' + i);
+            if (raw) {
+                try {
+                    const d = JSON.parse(raw);
+                    const t = new Date(d.timestamp);
+                    const dateStr = t.getFullYear() + '/' + (t.getMonth()+1) + '/' + t.getDate() + ' ' + ('0'+t.getHours()).slice(-2) + ':' + ('0'+t.getMinutes()).slice(-2);
+                    slotInfo.push({ slot: i, dynasty: d.player.dynastyName, title: d.player.emperorTitle, date: dateStr });
+                } catch(e) {
+                    slotInfo.push({ slot: i, dynasty: '', title: '', date: '' });
+                }
+            } else {
+                slotInfo.push(null);
+            }
         }
-        
+
+        const btnStyle = 'display:block;width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #D4AF37;background:rgba(255,215,0,0.08);color:#fff;cursor:pointer;font-size:0.95em;text-align:left;';
+        let slotsHtml = '';
+        for (let i = 0; i < 3; i++) {
+            const s = slotInfo[i];
+            const label = s
+                ? `<span style="color:#FFD700;">存档${i+1}</span> <span style="color:#aaa;">| ${s.dynasty} · ${s.title}帝 | ${s.date}</span>`
+                : `<span style="color:#FFD700;">存档${i+1}</span> <span style="color:#666;">（空）</span>`;
+            slotsHtml += `<button style="${btnStyle}" onclick="game.doSave(${i+1})">${label}</button>`;
+        }
+
+        this.modalManager.open('选择存档位', `
+            <div>
+                <p style="color:#aaa;font-size:0.85em;margin-bottom:8px;">选择存档位保存，已有数据将被覆盖</p>
+                ${slotsHtml}
+            </div>
+        `, [
+            { text: '取消', action: () => this.modalManager.close() }
+        ]);
+
+        // 暂存数据供 doSave 使用
+        this._pendingSaveData = saveData;
+    }
+
+    /**
+     * 执行保存到指定存档位
+     */
+    doSave(slot) {
+        if (!this._pendingSaveData) return;
+        localStorage.setItem('diwangsimulator2_slot' + slot, JSON.stringify(this._pendingSaveData));
+        this._pendingSaveData = null;
+        this._lastSaveSlot = slot;
+        this.modalManager.close();
+        this.showNotification('已保存到存档' + slot + '！', 'success');
+    }
+
+    /**
+     * 静默自动保存（用于页面关闭时）
+     */
+    autoSave() {
+        if (!this.isPlaying) return;
+        const saveData = {
+            player: this.player.getData(),
+            resources: this.resources.getData(),
+            state: this.state,
+            officials: this.officialSystem.getData(),
+            harem: this.haremSystem.getData(),
+            military: this.militarySystem.getData(),
+            diplomacy: this.diplomacySystem.getData(),
+            events: this.eventSystem.getData(),
+            timestamp: new Date().toISOString()
+        };
+        const slot = this._lastSaveSlot || 1;
+        localStorage.setItem('diwangsimulator2_slot' + slot, JSON.stringify(saveData));
+    }
+
+    /**
+     * 显示加载界面（存档列表）
+     */
+    showLoadScreen() {
+        // 迁移旧版单存档到存档位1
+        const oldSave = localStorage.getItem('diwangsimulator2_save');
+        if (oldSave && !localStorage.getItem('diwangsimulator2_slot1')) {
+            localStorage.setItem('diwangsimulator2_slot1', oldSave);
+            localStorage.removeItem('diwangsimulator2_save');
+        }
+
+        const slotInfo = [];
+        for (let i = 1; i <= 3; i++) {
+            const raw = localStorage.getItem('diwangsimulator2_slot' + i);
+            if (raw) {
+                try {
+                    const d = JSON.parse(raw);
+                    const t = new Date(d.timestamp);
+                    const dateStr = t.getFullYear() + '/' + (t.getMonth()+1) + '/' + t.getDate() + ' ' + ('0'+t.getHours()).slice(-2) + ':' + ('0'+t.getMinutes()).slice(-2);
+                    slotInfo.push({ slot: i, dynasty: d.player.dynastyName, title: d.player.emperorTitle, year: d.state.year, date: dateStr });
+                } catch(e) {
+                    slotInfo.push(null);
+                }
+            } else {
+                slotInfo.push(null);
+            }
+        }
+
+        const hasAnySave = slotInfo.some(s => s !== null);
+        if (!hasAnySave) {
+            this.showNotification('没有找到任何存档！', 'warning');
+            return;
+        }
+
+        const btnStyle = 'display:block;width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #D4AF37;background:rgba(255,215,0,0.08);color:#fff;cursor:pointer;font-size:0.95em;text-align:left;';
+        const disabledStyle = 'display:block;width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #333;background:rgba(255,255,255,0.03);color:#555;font-size:0.95em;text-align:left;cursor:default;';
+        let slotsHtml = '';
+        for (let i = 0; i < 3; i++) {
+            const s = slotInfo[i];
+            if (s) {
+                slotsHtml += `<button style="${btnStyle}" onclick="game.doLoad(${s.slot})">
+                    <span style="color:#FFD700;">存档${s.slot}</span>
+                    <span style="color:#ccc;"> | ${s.dynasty} · ${s.title}帝 | 在位${s.year}年</span>
+                    <div style="font-size:0.8em;color:#888;margin-top:2px;">${s.date}</div>
+                </button>`;
+            } else {
+                slotsHtml += `<div style="${disabledStyle}"><span style="color:#555;">存档${i+1}</span> <span style="color:#444;">（空）</span></div>`;
+            }
+        }
+
+        this.modalManager.open('读取存档', `
+            <div>${slotsHtml}</div>
+        `, [
+            { text: '取消', action: () => this.modalManager.close() }
+        ]);
+    }
+
+    /**
+     * 执行加载指定存档
+     */
+    doLoad(slot) {
+        const saveData = localStorage.getItem('diwangsimulator2_slot' + slot);
+        if (!saveData) {
+            this.showNotification('存档' + slot + '为空！', 'warning');
+            return;
+        }
+
         try {
             const data = JSON.parse(saveData);
-            
-            // 恢复游戏状态
+
             this.state = data.state;
             this.player.loadData(data.player);
             this.resources.loadData(data.resources);
@@ -343,24 +466,26 @@ class Game {
             this.militarySystem.loadData(data.military);
             this.diplomacySystem.loadData(data.diplomacy);
             this.eventSystem.loadData(data.events);
-            
-            // 进入游戏主界面
-            this.showScreen('main-game');
+
             this.isPlaying = true;
-            
-            // 更新UI
-            this.uiManager.updateAll();
-            
-            this.showNotification('游戏加载成功！', 'success');
-            console.log('游戏加载成功');
+            this.state.isPlaying = true;
+            this.modalManager.closeAll();
+
+            setTimeout(() => {
+                this.showScreen('main-game');
+                this.uiManager.updateAll();
+                this.showNotification('存档' + slot + '加载成功！', 'success');
+            }, 350);
+
+            console.log('游戏加载成功，存档位:', slot);
             return true;
         } catch (error) {
             console.error('加载游戏失败:', error);
-            this.showNotification('加载游戏失败！', 'error');
+            this.showNotification('加载存档失败！', 'error');
             return false;
         }
     }
-    
+
     /**
      * 显示设置
      */
@@ -436,9 +561,12 @@ class Game {
         this.modalManager.open('确认返回', '返回主菜单将丢失未保存的进度，是否继续？', [
             { text: '取消', action: () => this.modalManager.close() },
             { text: '返回', action: () => {
+                this.modalManager.closeAll();
                 this.isPlaying = false;
-                this.showScreen('splash-screen');
-                this.modalManager.close();
+                this.state.isPlaying = false;
+                setTimeout(() => {
+                    this.showScreen('splash-screen');
+                }, 350);
             }}
         ]);
     }
