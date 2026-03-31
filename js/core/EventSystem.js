@@ -165,9 +165,8 @@ class EventSystem {
                     if (choice.special) {
                         this.handleSpecialEvent(choice.special);
                     }
-                    game.showNotification(choice.message, 'info');
                     game.uiManager.updateAll();
-                    game.modalManager.close();
+                    game.showResult(choice.message, 'info');
                 }
             }));
 
@@ -383,7 +382,6 @@ class EventSystem {
                 if (choice.special) {
                     this.handleSpecialEvent(choice.special);
                 }
-                game.showNotification(choice.message, 'success');
                 this.storyProgress.main++;
 
                 // 记录剧情事件
@@ -396,7 +394,7 @@ class EventSystem {
                 });
 
                 game.uiManager.updateAll();
-                game.modalManager.close();
+                game.showResult(choice.message, 'success');
             }
         }));
 

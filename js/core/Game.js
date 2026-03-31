@@ -375,7 +375,7 @@ class Game {
         this._pendingSaveData = null;
         this._lastSaveSlot = slot;
         this.modalManager.close();
-        this.showNotification('已保存到存档' + slot + '！', 'success');
+        this.showResult('已保存到存档' + slot + '！', 'success');
     }
 
     /**
@@ -525,8 +525,8 @@ class Game {
                 const interval = document.getElementById('setting-autosave').value;
                 localStorage.setItem('diwangsimulator2_autosave_interval', interval);
                 this.setupAutoSave(parseInt(interval));
-                this.showNotification('设置已保存！', 'success');
                 this.modalManager.close();
+                this.showResult('设置已保存！', 'success');
             }}
         ]);
     }
@@ -633,6 +633,31 @@ class Game {
         }, 3000);
     }
     
+    /**
+     * 显示操作结果（Modal形式，用户必须点击关闭）
+     * 用于替代 showNotification + modalManager.close 的模式
+     * @param {string} message - 结果文案
+     * @param {string} type - 类型 success/warning/error/info
+     * @param {Function} callback - 关闭后的回调
+     */
+    showResult(message, type = 'info', callback = null) {
+        const icons = { success: '✅', warning: '⚠️', error: '❌', info: '📜' };
+        const titles = { success: '成功', warning: '警告', error: '危险', info: '结果' };
+        const colors = { success: '#4CAF50', warning: '#FF9800', error: '#f44336', info: '#FFD700' };
+
+        this.modalManager.open(titles[type] || '结果', `
+            <div style="text-align:center;padding:10px 0;">
+                <p style="font-size:1.5em;margin-bottom:8px;">${icons[type] || '📜'}</p>
+                <p style="color:${colors[type] || '#FFD700'};line-height:1.6;font-size:0.95em;">${message}</p>
+            </div>
+        `, [
+            { text: '知道了', action: () => {
+                this.modalManager.close();
+                if (callback) callback();
+            }}
+        ]);
+    }
+
     /**
      * 进入下一回合（下一个月）
      */
@@ -892,7 +917,6 @@ class Game {
             text: option,
             action: () => {
                 this.handleMemorialChoice(memorial.title, index);
-                this.modalManager.close();
             }
         })));
     }
@@ -1004,10 +1028,10 @@ class Game {
             message = '奏折已批阅。';
         }
 
-        this.showNotification(message, type);
         this.uiManager.updateResources();
+        this.showResult(message, type);
     }
-    
+
     /**
      * 任免官员
      */
@@ -1058,11 +1082,12 @@ class Game {
         if (!selectEl) return;
         const positionId = selectEl.value;
         const result = this.officialSystem.hireOfficial(officialId, positionId);
-        this.showNotification(result.message, result.success ? 'success' : 'warning');
         if (result.success) {
             this.uiManager.updateResources();
-            this.appointOfficials(); // 刷新列表
         }
+        this.showResult(result.message, result.success ? 'success' : 'warning', () => {
+            if (result.success) this.appointOfficials();
+        });
     }
 
     /**
@@ -1070,11 +1095,12 @@ class Game {
      */
     doFireOfficial(officialId) {
         const result = this.officialSystem.fireOfficial(officialId);
-        this.showNotification(result.message, result.success ? 'success' : 'warning');
         if (result.success) {
             this.uiManager.updateResources();
-            this.appointOfficials(); // 刷新列表
         }
+        this.showResult(result.message, result.success ? 'success' : 'warning', () => {
+            if (result.success) this.appointOfficials();
+        });
     }
     
     /**
@@ -1193,11 +1219,10 @@ class Game {
                 break;
         }
         
-        this.showNotification(message, 'success');
         this.uiManager.updateResources();
-        this.modalManager.close();
+        this.showResult(message, 'success');
     }
-    
+
     /**
      * 举行科举
      */
@@ -1219,15 +1244,15 @@ class Game {
         const literature = this.player.attributes.literature;
         const recruitCount = Math.floor(Math.random() * 3) + 1;
         
-        let message = `科举考试结束，录取${recruitCount}名进士：\n`;
-        
+        let message = `科举考试结束，录取${recruitCount}名进士：<br>`;
+
         for (let i = 0; i < recruitCount; i++) {
             const official = this.officialSystem.generateOfficial(literature);
-            message += `• ${official.name} - 能力${official.ability}，忠诚${official.loyalty}\n`;
+            message += `• ${official.name} - 能力${official.ability}，忠诚${official.loyalty}<br>`;
         }
-        
-        this.showNotification(message, 'success');
+
         this.uiManager.updateResources();
+        this.showResult(message, 'success');
     }
     
     /**
@@ -1298,9 +1323,8 @@ class Game {
         
         this.haremSystem.addConcubine(concubine);
         
-        this.showNotification(`选秀结束！纳${concubine.name}入宫，宠爱值${concubine.favor}`, 'success');
         this.uiManager.updateResources();
-        this.modalManager.close();
+        this.showResult(`选秀结束！纳${concubine.name}入宫，宠爱值${concubine.favor}`, 'success');
     }
     
     /**
@@ -1393,11 +1417,10 @@ class Game {
             }
         }
 
-        this.showNotification(result.message, result.success ? 'success' : 'warning');
         this.uiManager.updateResources();
-
-        // 刷新外交界面
-        this.openDiplomacy();
+        this.showResult(result.message, result.success ? 'success' : 'warning', () => {
+            this.openDiplomacy();
+        });
     }
 
     /**
@@ -1413,7 +1436,7 @@ class Game {
         if (!concubine) return;
 
         if (concubine.pregnant) {
-            this.showNotification('该妃子已有身孕！', 'warning');
+            this.showResult('该妃子已有身孕！', 'warning');
             return;
         }
 
@@ -1427,9 +1450,9 @@ class Game {
         if (Math.random() < pregnancyChance) {
             concubine.pregnant = true;
             concubine.pregnantTurn = 0;
-            this.showNotification(`${concubine.name}有喜了！宠爱+5`, 'success');
+            this.showResult(`${concubine.name}有喜了！宠爱+5`, 'success');
         } else {
-            this.showNotification(`与${concubine.name}共度良宵，宠爱+5`, 'info');
+            this.showResult(`与${concubine.name}共度良宵，宠爱+5`, 'info');
         }
 
         this.uiManager.updateEmperorStatus();
@@ -1537,9 +1560,8 @@ class Game {
                 if (amount > 0 && amount <= maxRecruit) {
                     this.resources.army += amount * 10000;
                     this.resources.money -= amount * 100000;
-                    this.showNotification(`成功招募${amount}万士兵！`, 'success');
                     this.uiManager.updateResources();
-                    this.modalManager.close();
+                    this.showResult(`成功招募${amount}万士兵！`, 'success');
                 }
             }}
         ]);
@@ -1550,13 +1572,8 @@ class Game {
      */
     trainArmy() {
         const result = this.militarySystem.trainArmy();
-        if (result.success) {
-            this.showNotification(result.message, 'success');
-        } else {
-            this.showNotification(result.message, 'warning');
-        }
         this.uiManager.updateResources();
-        this.modalManager.close();
+        this.showResult(result.message, result.success ? 'success' : 'warning');
     }
 
     /**
@@ -1569,10 +1586,10 @@ class Game {
         }
         this.resources.money -= 500000;
         const general = this.militarySystem.recruitGeneral();
-        this.showNotification(`招募到将领：${general.name}（统帅${general.command}，武力${general.strength}，智力${general.intelligence}）`, 'success');
         this.uiManager.updateResources();
-        this.modalManager.close();
-        this.manageMilitary(); // 刷新
+        this.showResult(`招募到将领：${general.name}（统帅${general.command}，武力${general.strength}，智力${general.intelligence}）`, 'success', () => {
+            this.manageMilitary();
+        });
     }
 
     /**
@@ -1583,10 +1600,10 @@ class Game {
         const general = this.militarySystem.generals.find(g => g.id === generalId);
         if (general) {
             general.assigned = true;
-            this.showNotification(`${general.name}被指派为出征统帅！`, 'success');
         }
-        this.modalManager.close();
-        this.manageMilitary();
+        this.showResult(`${general.name}被指派为出征统帅！`, 'success', () => {
+            this.manageMilitary();
+        });
     }
 
     /**
@@ -1594,12 +1611,12 @@ class Game {
      */
     doUpgradeFacility(type) {
         const result = this.militarySystem.upgradeFacility(type);
-        this.showNotification(result.message, result.success ? 'success' : 'warning');
         if (result.success) {
             this.uiManager.updateResources();
-            this.modalManager.close();
-            this.manageMilitary();
         }
+        this.showResult(result.message, result.success ? 'success' : 'warning', () => {
+            if (result.success) this.manageMilitary();
+        });
     }
 
     /**
@@ -1758,11 +1775,11 @@ class Game {
         // 处理特殊效果
         if (event.special === 'discover_talent') {
             const official = this.officialSystem.generateOfficial(80);
-            this.showNotification(`发现民间奇才${official.name}（能力${official.ability}）！`, 'success');
+            event.message += `<br>发现民间奇才${official.name}（能力${official.ability}）！`;
         }
         if (event.special === 'meet_concubine') {
             const concubine = this.haremSystem.generateConcubine(this.player.attributes.talent + 20);
-            this.showNotification(`偶遇才女${concubine.name}，纳入后宫！`, 'success');
+            event.message += `<br>偶遇才女${concubine.name}，纳入后宫！`;
         }
         if (event.special === 'trade_bonus') {
             this.resources.money += 500000;
@@ -1819,8 +1836,8 @@ class Game {
         this.player.stamina = Math.min(this.player.maxStamina, this.player.stamina + 50);
         this.player.health = Math.min(100, this.player.health + 5);
         
-        this.showNotification('休息了一夜，体力和健康有所恢复！', 'success');
         this.uiManager.updateEmperorStatus();
+        this.showResult('休息了一夜，体力和健康有所恢复！', 'success');
     }
     
     /**
@@ -2175,10 +2192,10 @@ class Game {
         this.techTree[techId]++;
 
         const names = { agriculture: '农业', military: '军事', culture: '文化', economy: '经济' };
-        this.showNotification(`${names[techId]}科技升至${this.techTree[techId]}级！`, 'success');
         this.uiManager.updateResources();
-        this.modalManager.close();
-        this.showTechTree();
+        this.showResult(`${names[techId]}科技升至${this.techTree[techId]}级！`, 'success', () => {
+            this.showTechTree();
+        });
     }
 
     /**
@@ -2363,9 +2380,9 @@ class Game {
         if (!child) return;
 
         this._crownPrince = childId;
-        this.showNotification(`${child.name}被立为太子！`, 'success');
-        this.modalManager.close();
-        this.setCrownPrince(); // 刷新界面
+        this.showResult(`${child.name}被立为太子！`, 'success', () => {
+            this.setCrownPrince();
+        });
     }
 
     /**

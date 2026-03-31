@@ -204,41 +204,44 @@ class OfficialSystem {
                 text: `武力镇压（消耗${severity * 100000}军队）`,
                 action: () => {
                     const armyCost = severity * 100000;
+                    let msg, type;
                     if (game.resources.army < armyCost) {
-                        game.showNotification('军队不足以镇压叛乱！', 'error');
-                        // 镇压失败，严重后果
                         game.resources.stability = Math.max(0, (game.resources.stability || 50) - 20);
                         game.resources.people = Math.max(0, game.resources.people - 15);
-                        game.showNotification('叛军肆虐，朝局动荡！稳定-20，民心-15', 'error');
+                        msg = '军队不足以镇压叛乱！叛军肆虐，朝局动荡！稳定-20，民心-15';
+                        type = 'error';
                     } else {
                         game.resources.army -= armyCost;
                         game.resources.stability = Math.max(0, (game.resources.stability || 50) - 5);
-                        game.showNotification(`成功镇压${official.name}的叛乱！声望+5`, 'success');
                         game.resources.prestige = Math.min(100, (game.resources.prestige || 50) + 5);
+                        msg = `成功镇压${official.name}的叛乱！声望+5`;
+                        type = 'success';
                     }
-                    // 处决叛臣
                     this.officials = this.officials.filter(o => o.id !== official.id);
                     game.uiManager.updateAll();
-                    game.modalManager.close();
+                    game.showResult(msg, type);
                 }
             },
             {
                 text: `花钱安抚（消耗${severity * 500000}两）`,
                 action: () => {
                     const moneyCost = severity * 500000;
+                    let msg, type;
                     if (game.resources.money < moneyCost) {
-                        game.showNotification('国库不足以安抚叛臣！', 'error');
                         game.resources.stability = Math.max(0, (game.resources.stability || 50) - 15);
                         game.resources.people = Math.max(0, game.resources.people - 10);
+                        msg = '国库不足以安抚叛臣！局势进一步恶化！稳定-15，民心-10';
+                        type = 'error';
                     } else {
                         game.resources.money -= moneyCost;
                         official.loyalty = 60;
                         official.ambition = Math.max(10, official.ambition - 20);
-                        game.showNotification(`${official.name}被安抚，忠诚度恢复。但朝臣们议论纷纷...`, 'warning');
                         game.resources.prestige = Math.max(0, (game.resources.prestige || 50) - 5);
+                        msg = `${official.name}被安抚，忠诚度恢复。但朝臣们议论纷纷...声望-5`;
+                        type = 'warning';
                     }
                     game.uiManager.updateAll();
-                    game.modalManager.close();
+                    game.showResult(msg, type);
                 }
             },
             {
@@ -249,9 +252,8 @@ class OfficialSystem {
                     game.resources.money -= severity * 200000;
                     if (game.resources.money < 0) game.resources.money = 0;
                     official.loyalty = Math.max(0, official.loyalty - 20);
-                    game.showNotification(`${official.name}的叛乱愈演愈烈！稳定度和民心大幅下降！`, 'error');
                     game.uiManager.updateAll();
-                    game.modalManager.close();
+                    game.showResult(`${official.name}的叛乱愈演愈烈！稳定度和民心大幅下降！`, 'error');
                 }
             }
         ]);
