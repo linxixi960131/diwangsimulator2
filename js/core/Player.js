@@ -237,6 +237,32 @@ class Player {
     }
     
     /**
+     * 成就定义
+     */
+    static ACHIEVEMENTS = [
+        { id: 'first_year', name: '开国之主', desc: '完成第一年执政', icon: '👑' },
+        { id: 'five_years', name: '稳坐江山', desc: '在位满5年', icon: '🏯' },
+        { id: 'ten_years', name: '十年基业', desc: '在位满10年', icon: '🏛️' },
+        { id: 'first_war_win', name: '首战告捷', desc: '赢得第一场战争', icon: '⚔️' },
+        { id: 'conquer_all', name: '征服四方', desc: '赢得所有4个战争目标', icon: '🗡️' },
+        { id: 'first_child', name: '龙凤呈祥', desc: '迎来第一个子嗣', icon: '👶' },
+        { id: 'many_children', name: '子孙满堂', desc: '拥有10个子嗣', icon: '👨‍👩‍👧‍👦' },
+        { id: 'high_literature', name: '文采斐然', desc: '文学达到80', icon: '📚' },
+        { id: 'high_martial', name: '武功盖世', desc: '武术达到80', icon: '🥋' },
+        { id: 'both_high', name: '文治武功', desc: '文学和武术都达到80', icon: '⭐' },
+        { id: 'rich', name: '富甲天下', desc: '国库突破5000万两', icon: '💰' },
+        { id: 'super_rich', name: '富可敌国', desc: '国库突破1亿两', icon: '💎' },
+        { id: 'beloved', name: '万民拥戴', desc: '民心达到100', icon: '❤️' },
+        { id: 'wise_ruler', name: '贤君圣主', desc: '民心和道德都超过90持续6个月', icon: '🌟' },
+        { id: 'trader', name: '丝路之王', desc: '与所有国家建立贸易', icon: '🤝' },
+        { id: 'diplomat', name: '纵横捭阖', desc: '缔结2个以上同盟', icon: '🌍' },
+        { id: 'full_court', name: '朝堂满座', desc: '任命所有7个职位', icon: '👔' },
+        { id: 'survivor', name: '命悬一线', desc: '健康值低于10后恢复到50以上', icon: '💪' },
+        { id: 'succession', name: '薪火相传', desc: '传位给下一代', icon: '🔥' },
+        { id: 'great_builder', name: '基建大帝', desc: '颁布3次以上建设类政令', icon: '🏗️' }
+    ];
+
+    /**
      * 获取综合评价
      */
     getEvaluation() {

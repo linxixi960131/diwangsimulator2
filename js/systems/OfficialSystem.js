@@ -163,10 +163,10 @@ class OfficialSystem {
         // 检查官员忠诚度
         this.officials.forEach(official => {
             if (official.hired && official.loyalty < 30) {
-                // 忠诚度低，可能发生叛变
-                if (Math.random() < 0.1) {
-                    console.log(`${official.name} 忠诚度太低，有叛变风险！`);
-                    // 这里可以触发叛变事件
+                // 忠诚度低+野心高=叛变概率更大
+                const rebellionChance = 0.05 + (official.ambition / 500);
+                if (Math.random() < rebellionChance) {
+                    this.triggerRebellion(official);
                 }
             }
         });
@@ -178,6 +178,85 @@ class OfficialSystem {
         }
     }
     
+    /**
+     * 触发官员叛变事件
+     */
+    triggerRebellion(official) {
+        if (!game || !game.modalManager) return;
+
+        const isChancellor = official.position === '丞相';
+        const title = isChancellor ? '权臣谋反！' : '官员叛变！';
+        const desc = isChancellor
+            ? `丞相${official.name}（忠诚:${official.loyalty}，野心:${official.ambition}）暗中勾结朝臣，意图谋反篡位！情况万分危急！`
+            : `${official.position || '待命'}${official.name}（忠诚:${official.loyalty}，野心:${official.ambition}）公然发动叛乱！`;
+
+        // 叛变规模取决于职位和野心
+        const severity = isChancellor ? 3 : (official.position ? 2 : 1);
+
+        game.modalManager.open(title, `
+            <div style="text-align:center;">
+                <p style="font-size:2rem;">⚔️</p>
+                <p style="margin:10px 0;color:#f44336;">${desc}</p>
+                <p style="color:#aaa;font-size:0.85em;">请陛下速速决断！</p>
+            </div>
+        `, [
+            {
+                text: `武力镇压（消耗${severity * 100000}军队）`,
+                action: () => {
+                    const armyCost = severity * 100000;
+                    if (game.resources.army < armyCost) {
+                        game.showNotification('军队不足以镇压叛乱！', 'error');
+                        // 镇压失败，严重后果
+                        game.resources.stability = Math.max(0, (game.resources.stability || 50) - 20);
+                        game.resources.people = Math.max(0, game.resources.people - 15);
+                        game.showNotification('叛军肆虐，朝局动荡！稳定-20，民心-15', 'error');
+                    } else {
+                        game.resources.army -= armyCost;
+                        game.resources.stability = Math.max(0, (game.resources.stability || 50) - 5);
+                        game.showNotification(`成功镇压${official.name}的叛乱！声望+5`, 'success');
+                        game.resources.prestige = Math.min(100, (game.resources.prestige || 50) + 5);
+                    }
+                    // 处决叛臣
+                    this.officials = this.officials.filter(o => o.id !== official.id);
+                    game.uiManager.updateAll();
+                    game.modalManager.close();
+                }
+            },
+            {
+                text: `花钱安抚（消耗${severity * 500000}两）`,
+                action: () => {
+                    const moneyCost = severity * 500000;
+                    if (game.resources.money < moneyCost) {
+                        game.showNotification('国库不足以安抚叛臣！', 'error');
+                        game.resources.stability = Math.max(0, (game.resources.stability || 50) - 15);
+                        game.resources.people = Math.max(0, game.resources.people - 10);
+                    } else {
+                        game.resources.money -= moneyCost;
+                        official.loyalty = 60;
+                        official.ambition = Math.max(10, official.ambition - 20);
+                        game.showNotification(`${official.name}被安抚，忠诚度恢复。但朝臣们议论纷纷...`, 'warning');
+                        game.resources.prestige = Math.max(0, (game.resources.prestige || 50) - 5);
+                    }
+                    game.uiManager.updateAll();
+                    game.modalManager.close();
+                }
+            },
+            {
+                text: '放任不管',
+                action: () => {
+                    game.resources.stability = Math.max(0, (game.resources.stability || 50) - (severity * 10));
+                    game.resources.people = Math.max(0, game.resources.people - (severity * 5));
+                    game.resources.money -= severity * 200000;
+                    if (game.resources.money < 0) game.resources.money = 0;
+                    official.loyalty = Math.max(0, official.loyalty - 20);
+                    game.showNotification(`${official.name}的叛乱愈演愈烈！稳定度和民心大幅下降！`, 'error');
+                    game.uiManager.updateAll();
+                    game.modalManager.close();
+                }
+            }
+        ]);
+    }
+
     /**
      * 获取数据（用于保存）
      */

@@ -99,6 +99,14 @@ class HaremSystem {
                     <span>容貌: ${concubine.beauty}</span>
                     <span>宠爱: ${concubine.favor}</span>
                     <span>性格: ${concubine.personality}</span>
+                    <span>年龄: ${concubine.age}岁</span>
+                    ${concubine.pregnant ? '<span style="color:#FF69B4;">有孕</span>' : ''}
+                </div>
+                <div style="margin-top:6px;">
+                    ${concubine.pregnant
+                        ? `<span style="color:#FF69B4;font-size:0.85em;">怀孕中（${concubine.pregnantTurn}/10月）</span>`
+                        : `<button onclick="game.visitConcubine(${JSON.stringify(concubine.id).replace(/"/g, '&quot;')})" style="padding:4px 12px;border-radius:4px;border:1px solid #FF69B4;background:rgba(255,105,180,0.15);color:#FF69B4;cursor:pointer;font-size:0.85em;">侍寝</button>`
+                    }
                 </div>
             </div>
         `).join('');

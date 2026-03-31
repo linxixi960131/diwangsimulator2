@@ -60,6 +60,56 @@ class UIManager {
         this.updateAttributes();
         this.updateDate();
         this.updateAvatar();
+        this.updateSidePanels();
+    }
+
+    /**
+     * 更新右侧面板（官员、事件、任务）
+     */
+    updateSidePanels() {
+        // 更新官员列表
+        if (this.game.officialSystem) {
+            this.updateOfficialsList(this.game.officialSystem.getHiredOfficials());
+        }
+
+        // 更新事件列表
+        if (this.game.eventSystem) {
+            this.updateEventsList(this.game.eventSystem.getEventHistory(10));
+        }
+
+        // 更新任务/主线进度
+        this.updateQuestsList();
+    }
+
+    /**
+     * 更新任务列表（主线进度 + 成就进度）
+     */
+    updateQuestsList() {
+        const listElement = document.getElementById('quests-list');
+        if (!listElement) return;
+
+        let html = '';
+
+        // 主线剧情进度
+        if (this.game.eventSystem) {
+            const chapters = this.game.eventSystem.getStoryChapters();
+            const progress = this.game.eventSystem.storyProgress.main;
+            html += '<div style="margin-bottom:10px;"><p style="color:#FFD700;font-weight:bold;font-size:0.9em;">📖 主线剧情</p>';
+            chapters.forEach((ch, i) => {
+                const status = i < progress ? '✅' : i === progress ? '➡️' : '🔒';
+                const color = i < progress ? '#4CAF50' : i === progress ? '#FFD700' : '#555';
+                html += `<div style="padding:4px 0;color:${color};font-size:0.85em;">${status} ${ch.title}${i === progress ? ' <span style="color:#aaa;font-size:0.8em;">(第${ch.triggerYear}年触发)</span>' : ''}</div>`;
+            });
+            html += '</div>';
+        }
+
+        // 成就进度
+        const unlocked = (this.game.player && this.game.player.achievements) ? this.game.player.achievements.length : 0;
+        const total = (typeof Player !== 'undefined' && Player.ACHIEVEMENTS) ? Player.ACHIEVEMENTS.length : 0;
+        html += `<div><p style="color:#FFD700;font-weight:bold;font-size:0.9em;">🏆 成就 (${unlocked}/${total})</p>`;
+        html += `<p style="color:#aaa;font-size:0.85em;">点击底部"成就"按钮查看详情</p></div>`;
+
+        listElement.innerHTML = html;
     }
     
     /**
