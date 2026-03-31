@@ -1268,30 +1268,27 @@ class Game {
         this.uiManager.updateEmperorStatus();
         
         this.modalManager.open('后宫', `
-            <div class="harem-content">
+            <div class="harem-content" style="max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
                 <div class="harem-tabs">
                     <button class="harem-tab active" data-harem-tab="concubines">妃子</button>
                     <button class="harem-tab" data-harem-tab="children">子嗣</button>
-                    <button class="harem-tab" data-harem-tab="selection">选秀</button>
                 </div>
                 <div class="harem-panel" id="harem-concubines">
-                    ${this.haremSystem.getConcubinesList()}
+                    <button onclick="game.holdSelection()" style="display:block;width:100%;padding:10px;margin-bottom:10px;border-radius:6px;border:1px solid #FF69B4;background:rgba(255,105,180,0.1);color:#FF69B4;cursor:pointer;font-size:0.9em;">🌸 举行选秀（消耗100万两）</button>
+                    <div id="harem-concubines-list">
+                        ${this.haremSystem.getConcubinesList()}
+                    </div>
                 </div>
                 <div class="harem-panel hidden" id="harem-children">
                     ${this.haremSystem.getChildrenList()}
                     ${this.haremSystem.children.some(c => c.gender === 'male' && c.age >= 12) ?
                         '<button onclick="game.setCrownPrince()" style="display:block;width:100%;padding:10px;margin-top:10px;border-radius:6px;border:1px solid #FFD700;background:rgba(255,215,0,0.1);color:#FFD700;cursor:pointer;">👑 立储</button>' : ''}
                 </div>
-                <div class="harem-panel hidden" id="harem-selection">
-                    <button class="selection-btn" onclick="game.holdSelection()">
-                        举行选秀（消耗100万两）
-                    </button>
-                </div>
             </div>
         `, [
             { text: '离开', action: () => this.modalManager.close() }
         ]);
-        
+
         // 绑定后宫标签页切换
         setTimeout(() => {
             document.querySelectorAll('.harem-tab').forEach(tab => {
@@ -1316,15 +1313,19 @@ class Game {
         }
         
         this.resources.money -= 1000000;
-        
+
         // 根据才艺属性决定遇到名妃的概率
         const talent = this.player.attributes.talent;
         const concubine = this.haremSystem.generateConcubine(talent);
-        
-        this.haremSystem.addConcubine(concubine);
-        
+
         this.uiManager.updateResources();
-        this.showResult(`选秀结束！纳${concubine.name}入宫，宠爱值${concubine.favor}`, 'success');
+        this.showResult(`选秀结束！纳${concubine.name}入宫，宠爱值${concubine.favor}`, 'success', () => {
+            // 刷新妃子列表
+            const listEl = document.getElementById('harem-concubines-list');
+            if (listEl) {
+                listEl.innerHTML = this.haremSystem.getConcubinesList();
+            }
+        });
     }
     
     /**
