@@ -1833,12 +1833,15 @@ class Game {
      * 休息
      */
     rest() {
-        // 恢复体力和健康
-        this.player.stamina = Math.min(this.player.maxStamina, this.player.stamina + 50);
+        // 休息 = 推进一个月 + 额外恢复体力和健康
+        this.nextTurn();
+
+        // nextTurn 已恢复体力+30，额外再+20（总计+50）和健康+5
+        this.player.stamina = Math.min(this.player.maxStamina, this.player.stamina + 20);
         this.player.health = Math.min(100, this.player.health + 5);
-        
+
         this.uiManager.updateEmperorStatus();
-        this.showResult('休息了一夜，体力和健康有所恢复！', 'success');
+        this.showResult(`休养生息一月，龙体康健！<br>已进入${this.getDateString()}，体力和健康大幅恢复。`, 'success');
     }
     
     /**
