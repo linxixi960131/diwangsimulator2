@@ -98,7 +98,9 @@ class UIManager {
             chapters.forEach((ch, i) => {
                 const status = i < progress ? '✅' : i === progress ? '➡️' : '🔒';
                 const color = i < progress ? '#4CAF50' : i === progress ? '#FFD700' : '#555';
-                html += `<div style="padding:4px 0;color:${color};font-size:0.85em;">${status} ${ch.title}${i === progress ? ' <span style="color:#aaa;font-size:0.8em;">(第${ch.triggerYear}年触发)</span>' : ''}</div>`;
+                const monthNames = ['', '正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '腊月'];
+                const triggerHint = i === progress ? ` <span style="color:#aaa;font-size:0.8em;">(第${ch.triggerYear}年${monthNames[ch.triggerMonth] || ''}自动触发)</span>` : '';
+                html += `<div style="padding:4px 0;color:${color};font-size:0.85em;">${status} ${ch.title}${triggerHint}</div>`;
             });
             html += '</div>';
         }

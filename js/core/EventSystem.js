@@ -362,7 +362,10 @@ class EventSystem {
 
         if (!nextChapter) return; // 所有章节已完成
 
-        if (year >= nextChapter.triggerYear && month >= nextChapter.triggerMonth) {
+        // 用总月数比较，避免 year=2,month=1 无法触发 triggerYear=1,triggerMonth=6 的问题
+        const currentTotal = year * 12 + month;
+        const triggerTotal = nextChapter.triggerYear * 12 + nextChapter.triggerMonth;
+        if (currentTotal >= triggerTotal) {
             this.triggerStoryEvent(nextChapter);
         }
     }

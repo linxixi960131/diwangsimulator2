@@ -13,7 +13,10 @@ class ModalManager {
         
         // 模态框历史（用于返回）
         this.modalHistory = [];
-        
+
+        // 关闭动画定时器（用于取消pending的close）
+        this._closeTimer = null;
+
         // 初始化
         this.init();
     }
@@ -48,6 +51,12 @@ class ModalManager {
      * @param {Object} options - 其他选项
      */
     open(title, content, buttons = [], options = {}) {
+        // 取消任何pending的close定时器，防止新modal被旧close摧毁
+        if (this._closeTimer) {
+            clearTimeout(this._closeTimer);
+            this._closeTimer = null;
+        }
+
         // 保存当前模态框到历史
         if (this.currentModal) {
             this.modalHistory.push(this.currentModal);
@@ -133,7 +142,8 @@ class ModalManager {
                 modalContent.classList.add('animate-scaleOut');
                 
                 // 动画完成后隐藏
-                setTimeout(() => {
+                this._closeTimer = setTimeout(() => {
+                    this._closeTimer = null;
                     this.container.classList.add('hidden');
                     this.container.innerHTML = '';
                 }, 300);
